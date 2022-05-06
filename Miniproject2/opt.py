@@ -1,0 +1,1 @@
+# Class for optimizers SGD and Adam ( if time allows )

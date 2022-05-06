@@ -128,6 +128,41 @@ class CNN(Module):
     def zero_grad(self):
         self.dfilt.zero()
 
+class Pooling(Module):
+    ## class has no weights 
+     def __init__(self, stride=2, size=2):
+        self.input = None
+        self.stride = stride
+        self.size = size
+    
+     def forward(self, x):
+            self.input = x                            # keep track of last input for later backward propagation
+
+        num_channels, h_prev, w_prev = image.size()
+        h = int((h_prev - self.size) / self.stride) + 1     # compute output dimensions after the max pooling
+        w = int((w_prev - self.size) / self.stride) + 1
+
+        downsampled = torch.zeros((num_channels, h, w))        # hold the values of the max pooling
+
+        for i in range(num_channels):                       # slide the window over every part of the image and
+            curr_y = out_y = 0                              # take the maximum value at each step
+            while curr_y + self.size <= h_prev:             # slide the max pooling window vertically across the image
+                curr_x = out_x = 0
+                while curr_x + self.size <= w_prev:         # slide the max pooling window horizontally across the image
+                    patch = image[i, curr_y:curr_y + self.size, curr_x:curr_x + self.size]
+                    downsampled[i, out_y, out_x] = torch.max(patch)       # choose the maximum value within the window
+                    curr_x += self.stride                              # at each step and store it to the output matrix
+                    out_x += 1
+                curr_y += self.stride
+                out_y += 1
+
+        return downsampled
+    
+    def backward(self, din, learning_rate):
+        #### TODO 
+
+    def param(self):                          # pooling layers have no weights
+        return None
 
 
 
