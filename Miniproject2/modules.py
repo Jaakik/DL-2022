@@ -159,7 +159,10 @@ class Pooling(Module):
         return downsampled
     
     def backward(self, din, learning_rate):
-        #### TODO 
+        #### TODO ? 
+        
+    def zero_grad(self):
+        ## TODO ? 
 
     def param(self):                          # pooling layers have no weights
         return None
