@@ -45,6 +45,10 @@ class Sequential(Module):
 
         Module.__init__(self)
         self.modules = list(modules)
+    
+    def init_params():
+        for module in self.modules:
+            module.init_params()
         
 
     def forward(self, *input_):
@@ -315,7 +319,7 @@ class MAXPOOL2D(Module):
         return None
 
 
-class Upsampling(Module):
+class MaxPool2d(Module):
     ''' 
     Upsampling layer with nearest mode which simply repeats up to a scale factor the elements around their neighborhood 
     :param scale_factor: upsampling factor 
