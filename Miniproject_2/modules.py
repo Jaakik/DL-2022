@@ -224,6 +224,10 @@ class  Conv2d(Module):
                 out_y += 1
         self.dfilt = dfilt
         return dout
+    
+    def init_params(self, weights):
+        self.filters = weights 
+
 
     def update(self, lr):
 
@@ -316,8 +320,10 @@ class MAXPOOL2D(Module):
         pass
 
     def param(self):                          # pooling layers have no weights
-        return None
-
+        return []
+    
+    def init_params(self, weights):
+        pass
 
 class MaxPool2d(Module):
     ''' 
@@ -341,6 +347,12 @@ class MaxPool2d(Module):
         dout = torch.zeros(self.input.shape) 
         dout[0] = din[0][0::2,0::2]
         return dout 
+    
+      def param(self):                          # pooling layers have no weights
+        return []
+    
+    def init_params(self, weights):
+        pass
         
         
     

@@ -44,3 +44,6 @@ class LossMSE(Module):
         """
 
         return 2 * self.e / self.n
+
+      def param(self):                          # Relu layers have no weights
+        return []
