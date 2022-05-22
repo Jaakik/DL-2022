@@ -1,7 +1,7 @@
 """ Module containing implementations of loss functions """
 
 from torch import zeros, softmax, log_softmax
-from models import Module
+from modules import Module
 
 
 class LossMSE(Module):
@@ -45,5 +45,8 @@ class LossMSE(Module):
 
         return 2 * self.e / self.n
 
-      def param(self):                          # Relu layers have no weights
+    def param(self):                          # Relu layers have no weights
         return []
+    
+    def init_params(self, weights):
+        pass 

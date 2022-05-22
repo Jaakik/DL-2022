@@ -1,6 +1,6 @@
 """ Module containing implementations of activation functions """
 
-from models import Module
+from modules import Module
 
 
 class ReLU(Module):

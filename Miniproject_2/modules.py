@@ -241,7 +241,7 @@ class  Conv2d(Module):
     def zero_grad(self):
         self.dfilt = zeros((self.num_filters,self.size,self.size))
 
-class MAXPOOL2D(Module):
+class MaxPooling2D(Module):
     """
     Applies a 2D max pooling over an input signal composed of several input planes.
     Notice that this class has weights
@@ -325,7 +325,7 @@ class MAXPOOL2D(Module):
     def init_params(self, weights):
         pass
 
-class MaxPool2d(Module):
+class Upsampling(Module):
     ''' 
     Upsampling layer with nearest mode which simply repeats up to a scale factor the elements around their neighborhood 
     :param scale_factor: upsampling factor 
@@ -348,7 +348,7 @@ class MaxPool2d(Module):
         dout[0] = din[0][0::2,0::2]
         return dout 
     
-      def param(self):                          # pooling layers have no weights
+    def param(self):                          # pooling layers have no weights
         return []
     
     def init_params(self, weights):

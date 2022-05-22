@@ -1,5 +1,6 @@
-from modules import Conv2d, Sequential, MaxPool2d
+from modules import Conv2d, Sequential, MaxPooling2D, Upsampling
 from criterion import LossMSE
+from activations import ReLU
 from opt import SGD
 import pickle as pkl 
 
@@ -26,13 +27,14 @@ class Model(object) :
       #: returns a tensor of the size (N1 , C, H, W) with values in range 0 -255.
       pass
 
-class Unet(Model)
+class Unet(Model):
 
-    def __init__ (self,nb_epochs =50 , mini_batch_size = 1, , lr = 0.0008 criterion = LossMSE())  :
+    def __init__ (self,nb_epochs =50 , mini_batch_size = 1,  lr = 0.0008 ,criterion = LossMSE())  :
         self.nb_epochs = nb_epochs
         self.lr = lr
         self.mini_batch_size = mini_batch_size
-        self.model = Sequential(Conv2d(5,3,1,3), ReLU(), Conv2d(5,3,1,3), ReLU(),MaxPooling2d(),Upsampling(),Conv2d(5,3,1,3),ReLU(), Conv2d(5,3,1,3), ReLU())
+        self.criterion = criterion
+        self.model = Sequential(Conv2d(5,3,1,3), ReLU(), Conv2d(5,3,1,3), ReLU(),MaxPooling2D(),Upsampling(),Conv2d(5,3,1,3),ReLU(), Conv2d(5,3,1,3), ReLU())
         self.optimizer = SGD(model=self.model, nb_epochs=nb_epochs, mini_batch_size=mini_batch_size,
                              lr=lr, criterion=criterion)
     
