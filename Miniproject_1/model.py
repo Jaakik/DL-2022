@@ -231,7 +231,7 @@ class Model():
       self.model=UNet()
       # put model on cuda
       self.model=self.model.to(self.device)
-      self.bestpth = './bestmodel.pth'
+      self.bestpth = Path(__file__).parent / "bestmodel.pth"
       # TOBE DELETED: optimizer_name only used for finding best model
       self.optimizer_name="Adam"
 
@@ -245,7 +245,7 @@ class Model():
   def train (self , train_input , train_target , num_epochs ) -> None :
     #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images
     #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images , which only differs from the input by their noise
-    
+    train_input, train_target = train_input.float(), train_target.float()
     #: The following code is adpted from https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
     all_data=TensorDataset(train_input,train_target)
     # set the seed number for reproducibility
@@ -308,8 +308,8 @@ class Model():
         if avg_vloss < best_vloss:
             print(f'Validation Loss Decreased({best_vloss:.6f}--->{avg_vloss:.6f}) \t Saving The Model')
             best_vloss = avg_vloss
-            model_path = './model_{}_opt-{}_bat-{}_epo-{}.pth'.format(timestamp,self.optimizer_name, self.batch_size, epoch_number)
-            torch.save(model.state_dict(), model_path)
+            # model_path = './model_{}_opt-{}_bat-{}_epo-{}.pth'.format(timestamp,self.optimizer_name, self.batch_size, epoch_number)
+            # torch.save(model.state_dict(), model_path)
 
 
     time_elapsed = time.time() - start
@@ -321,4 +321,4 @@ class Model():
       test_input=test_input.to(self.device)
       
       self.model.eval()
-      return self.model(test_input)
+      return self.model(test_input.float())
