@@ -1,10 +1,10 @@
 # DL-2022
-Proj SCIPER1 SCIPER2 SCIPER3
+Proj 273667 SCIPER2 SCIPER3
 
 Miniproject 1
 
     - init .py:
-    - model.py:
+    - model.py: 
     - bestmodel.pth
     - Report 1.pdf
     - others
