@@ -1,6 +1,6 @@
 """ Module containing implementations of activation functions """
 
-from modules import Module
+from .modules import Module
 
 
 class ReLU(Module):
@@ -97,5 +97,42 @@ class LeakyReLU(Module):
         out = self.s.clone()
         out[out > 0] = 1
         out[out < 0] = self.alpha
+
+        return out.mul(input_)
+    
+    
+class Sigmoid(Module):
+    """ Module class performing sigmoid activation """
+
+    def __init__(self):
+        """ Sigmoid constructor """
+
+        Module.__init__(self)
+        self.s = None
+
+    def forward(self, *input_):
+        """
+        Sigmoid forward pass
+        :param input_: output from the previous layer, torch.Tensor
+        :returns: Sigmoid(x_l) = 1 / (1 + Exp(-x_l))
+        """
+
+        s = input_[0].clone()
+        self.s = s
+
+        return s.sigmoid()
+
+    def backward(self, *gradwrtoutput):
+        """
+        Sigmoid backward pass
+        We use the fact that Sigmoid(x) solves the differential equation y' = y(1 - y)
+        :param gradwrtoutput: gradient of the next layer, torch.Tensor
+        :returns: Grad(Sigmoid(x_l)) = Sigmoid(x_l) * (1 - Sigmoid(x_l)) * Grad(x_l+1)
+        """
+
+        input_ = gradwrtoutput[0].clone()
+
+        out = self.s.clone()
+        out = out.sigmoid() * (1 - out.sigmoid())
 
         return out.mul(input_)

@@ -2,7 +2,7 @@
 
 import torch
 import math
-from criterion import LossMSE
+from .criterion import LossMSE
 
 
 

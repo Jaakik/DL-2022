@@ -1,6 +1,6 @@
 # example run of Mini version of Unit model with layers implemented from scratch 
 
-from model import Unet
+from model import Model
 from torch import empty, zeros , nn 
 import math
 import torch
@@ -15,7 +15,7 @@ input_data = torch.empty(444,3,32, 32).uniform_(0, 1)
 target_data = torch.empty(444, 3,32, 32).uniform_(0, 1)
 
 # Unet Model
-model = Unet()
+model = Model()
 
 # Train model 
 #model.train(input_data, target_data)

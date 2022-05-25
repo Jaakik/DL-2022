@@ -1,7 +1,7 @@
 """ Module containing implementations of loss functions """
 
 from torch import zeros, softmax, log_softmax
-from modules import Module
+from .modules import Module
 
 
 class LossMSE(Module):

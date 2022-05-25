@@ -1,18 +1,18 @@
-from modules import Conv2d, Sequential, MaxPooling2D, Upsampling
-from criterion import LossMSE
-from activations import ReLU
-from opt import SGD
+from .others.modules import Conv2d, Sequential, MaxPooling2D, Upsampling
+from .others.criterion import LossMSE
+from .others.activations import ReLU, Sigmoid
+from .others.opt import SGD
 import pickle as pkl 
 
 ### For mini - project 2
 
-class Model(object) :
+class Base_Model(object) :
     
     def __init__ ( self )  :
        ## instantiate model + optimizer + loss function + any other stuff you need
        pass
 
-    def load_pretrained_model ( self ) :
+    def load_pretrained_model ( self, model ) :
       ## This loads the parameters saved in bestmodel .pth into the model
        pass
 
@@ -27,7 +27,7 @@ class Model(object) :
       #: returns a tensor of the size (N1 , C, H, W) with values in range 0 -255.
       pass
 
-class Unet(Model):
+class Model(Base_Model):
 
     def __init__ (self,nb_epochs =50 , mini_batch_size = 1,  lr = 0.0008 ,criterion = LossMSE())  :
         self.nb_epochs = nb_epochs
@@ -71,13 +71,14 @@ class Unet(Model):
         
     
     
-    def save_model(save_path):
+    def save_model(self, save_path):
         
         with open(save_path, 'wb') as handle:
             pickle.dump(self.model.param(), handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-    def load_pretrained_model (model_path, model) :
+    def load_pretrained_model (self) :
         
+        model_path = ""
         with open(model_path, 'rb') as handle:
             weights = pickle.load(handle)
         
