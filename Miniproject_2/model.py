@@ -34,7 +34,7 @@ class Unet(Model):
         self.lr = lr
         self.mini_batch_size = mini_batch_size
         self.criterion = criterion
-        self.model = Sequential(Conv2d(5,3,1,3), ReLU(), Conv2d(5,3,1,3), ReLU(),MaxPooling2D(),Upsampling(),Conv2d(5,3,1,3),ReLU(), Conv2d(5,3,1,3), ReLU())
+        self.model = Sequential(Conv2d(3,3,1,3))
         self.optimizer = SGD(model=self.model, nb_epochs=nb_epochs, mini_batch_size=mini_batch_size,
                              lr=lr, criterion=criterion)
     

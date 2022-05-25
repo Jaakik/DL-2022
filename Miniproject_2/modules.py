@@ -141,7 +141,8 @@ class  Conv2d(Module):
         """
     def __init__(self, num_filters=5, n_channels = 3, stride=1, size=3):
         super().__init__()
-        self.filters = torch.empty((num_filters,size,size))
+        #self.filters = torch.normal(0, 1, size=(num_filters,n_channels ,size,size))
+        self.filters = torch.empty(num_filters,n_channels ,size,size).uniform_(-1/100, 1/100)
         self.stride = stride
         self.n_channels = n_channels 
         self.size = size
@@ -151,8 +152,7 @@ class  Conv2d(Module):
 
     
     def init_params(self, normal = True):
-        if normal : 
-            self.filters = torch.normal(0, 1, size=(self.num_filters,self.n_channels ,self.size,self.size))
+        pass
 
         
     def forward(self, x):
