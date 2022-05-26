@@ -19,6 +19,5 @@ Miniproject 2
     - model.py
     - bestmodel.pth
     - others
-        - otherfile1.py
-        - otherfile2.py
+
     - Report 2.pdf
