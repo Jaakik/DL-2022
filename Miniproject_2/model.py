@@ -3,6 +3,7 @@ from .others.criterion import LossMSE
 from .others.activations import ReLU, Sigmoid
 from .others.opt import SGD
 import pickle as pkl 
+import torch
 
 ### For mini - project 2
 
@@ -34,7 +35,8 @@ class Model(Base_Model):
         self.lr = lr
         self.mini_batch_size = mini_batch_size
         self.criterion = criterion
-        self.model = Sequential(Conv2d(3,3,1,3))
+        self.model = Sequential(Conv2d(3,3,3,1),ReLU(), MaxPooling2D(),Conv2d(3,3,3,1),ReLU(), Upsampling(), Sigmoid())
+        
         self.optimizer = SGD(model=self.model, nb_epochs=nb_epochs, mini_batch_size=mini_batch_size,
                              lr=lr, criterion=criterion)
     
@@ -65,11 +67,11 @@ class Model(Base_Model):
     
     def predict ( self , test_input ) :
         
-        output = self.model.forward(test_input)
+        output = torch.zeros(test_input.shape)
+        for b in range(test_input.size(0)):
+            output[b] = self.model.forward(test_input[b])
         return output
 
-        
-    
     
     def save_model(self, save_path):
         
@@ -78,14 +80,13 @@ class Model(Base_Model):
     
     def load_pretrained_model (self) :
         
-        model_path = ""
+        model_path = "/Users/marouanejaakik/Desktop/courses/DL-2022/Miniproject_2/best_model.pth"
         with open(model_path, 'rb') as handle:
-            weights = pickle.load(handle)
+            weights = torch.load(handle)
         
-        for params, model in enumerate(weights, self.model.modules) : 
-            model.init_params(params)
+        for params, m in zip(weights, self.model.modules) : 
+            m.init_params(params)
         
-        return model 
             
     
     

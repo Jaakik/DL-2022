@@ -46,6 +46,12 @@ class ReLU(Module):
         out[out < 0] = 0
 
         return out.mul(input_)
+    
+    def init_params(self, weights):
+        pass 
+    
+    def param(self):                          
+        return []
 
 
 class LeakyReLU(Module):
@@ -100,6 +106,12 @@ class LeakyReLU(Module):
 
         return out.mul(input_)
     
+    def init_params(self, weights):
+        pass 
+    
+    def param(self):                          
+        return []
+    
     
 class Sigmoid(Module):
     """ Module class performing sigmoid activation """
@@ -136,3 +148,9 @@ class Sigmoid(Module):
         out = out.sigmoid() * (1 - out.sigmoid())
 
         return out.mul(input_)
+
+    def init_params(self, weights):
+        pass 
+
+    def param(self):                          
+        return []

@@ -28,7 +28,7 @@ class Module(object):
     def zero_grad(self):
         pass
 
-    def init_params(self):
+    def init_params(self,weights):
         pass
 
 class Sequential(Module):
@@ -139,10 +139,10 @@ class  Conv2d(Module):
         :param num_filters: number of output channels 
     
         """
-    def __init__(self, num_filters=5, n_channels = 3, stride=1, size=3):
+    def __init__(self, num_filters=3, n_channels = 3,  size=3, stride=1):
         super().__init__()
         #self.filters = torch.normal(0, 1, size=(num_filters,n_channels ,size,size))
-        self.filters = torch.empty(num_filters,n_channels ,size,size).uniform_(-1/100, 1/100)
+        self.filters = torch.empty(num_filters,n_channels ,size,size).uniform_(-1/10, 1/10)
         self.stride = stride
         self.n_channels = n_channels 
         self.size = size
@@ -151,15 +151,13 @@ class  Conv2d(Module):
         
 
     
-    def init_params(self, normal = True):
-        pass
-
-        
+    
     def forward(self, x):
         x = x.squeeze()
         dim = x.size(dim=1)
         self.sz = dim
         self.in_dim = x.size()
+        
 
         
         padded_shape = dim + 2     # input padded shape , padding = 1 by default 
@@ -202,11 +200,7 @@ class  Conv2d(Module):
     def backward(self, din):
         input_dimension = self.sz        # input dimension
         
-        
-        
         dout = torch.zeros(self.num_filters,input_dimension,input_dimension)  # loss gradient of the input to the convolution operation
-        
-        
         
         dfilt = torch.zeros(self.filters.size())                # loss gradient of filter
 
@@ -338,8 +332,12 @@ class Upsampling(Module):
     def forward(self, x):
         self.input = x     
         num_channels, h, w = x.size()
-        upsampled = x[0].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
-        upsampled = torch.unsqueeze(upsampled, 0)
+        upsampled = torch.zeros((num_channels, h *self.scale_factor, w*self.scale_factor)) 
+        upsampled[0] = x[0].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+        upsampled[1] = x[1].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+        upsampled[2] = x[2].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+
+
         return upsampled 
     
     
