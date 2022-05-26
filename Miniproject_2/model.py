@@ -41,9 +41,9 @@ class Model(Base_Model):
                              lr=lr, criterion=criterion)
     
     
-    def train (self , train_input , train_target) :
+    def train (self , train_input , train_target, num_epochs) :
         
-        for e in range(self.nb_epochs):
+        for e in range(num_epochs):
             sum_loss = 0.
 
             for b in range(0, train_input.size(0), self.mini_batch_size):
@@ -69,7 +69,7 @@ class Model(Base_Model):
         
         output = torch.zeros(test_input.shape)
         for b in range(test_input.size(0)):
-            output[b] = self.model.forward(test_input[b])
+            output[b] = self.model.forward(test_input[b].unsqueeze(0))
         return output
 
     

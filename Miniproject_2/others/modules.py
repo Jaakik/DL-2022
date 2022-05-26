@@ -3,6 +3,7 @@
 from torch import empty, zeros
 import math
 import torch
+import torch.nn as nn
 
 
 class Module(object):
@@ -139,101 +140,77 @@ class  Conv2d(Module):
         :param num_filters: number of output channels 
     
         """
-    def __init__(self, num_filters=3, n_channels = 3,  size=3, stride=1):
-        super().__init__()
-        #self.filters = torch.normal(0, 1, size=(num_filters,n_channels ,size,size))
-        self.filters = torch.empty(num_filters,n_channels ,size,size).uniform_(-1/10, 1/10)
+    def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, padding=1, bias=True):
+        super(Conv2d, self).__init__()
+        self.k = kernel_size
+        self.in_c = in_channel
+        self.out_c = out_channel
         self.stride = stride
-        self.n_channels = n_channels 
-        self.size = size
-        self.num_filters = num_filters
-        self.dfilt = zeros((num_filters,size,size))
+        self.padding = padding
+        self.conv = torch.empty(out_channel, in_channel, kernel_size, kernel_size).uniform_(-1/10, 1/10)
         
 
     
     
-    def forward(self, x):
-        x = x.squeeze()
-        dim = x.size(dim=1)
-        self.sz = dim
-        self.in_dim = x.size()
+    def forward(self, inp):
         
-
+        self.input = inp # for backpropagation
         
-        padded_shape = dim + 2     # input padded shape , padding = 1 by default 
+        k = self.k
+        stride = self.stride
+        h_in  = inp.size(2)
+        w_in  = inp.size(2)
+
+        padding = self.padding  # + k//2
+        batch_size = inp.shape[0]
+
+        h_out = (h_in + 2 * padding - (k - 1) - 1) / stride + 1
+        w_out = (w_in + 2 * padding - (k - 1) - 1) / stride + 1
+        h_out, w_out = int(h_out), int(w_out)
+
+        inp_unf = torch.nn.functional.unfold(inp, (k, k), padding=padding)
+        out_unf = inp_unf.transpose(1, 2).matmul(self.conv.view(self.conv.size(0), -1).t()).transpose(1, 2)
+        out_ = torch.nn.functional.fold(out_unf, (h_out, w_out), (1, 1))
         
-        in_tensor = zeros(self.n_channels,padded_shape,padded_shape)
-
-        in_tensor[0][:dim,:dim] = x[0]    # Input channels being 3 for our dataset
-        in_tensor[1][:dim,:dim] = x[1]
-        in_tensor[2][:dim,:dim] = x[2]
-        
-
-
-        
-
-        self.input = in_tensor     # keep track of last input for later backward propagation
-        
-
-        input_dimension = in_tensor.size(dim=1)                                              # input dimension
-
-        output_dimension = int((input_dimension - self.size) / self.stride) + 1         # output dimension
-        
-
-        out = torch.empty((self.num_filters, output_dimension, output_dimension))     # create the matrix to hold the
-                                                                                        # values of the convolution
-
-        for f in range(self.num_filters):              # convolve each filter over the image,
-            tmp_y = out_y = 0                               # moving it vertically first and then horizontally
-            while tmp_y + self.size <= input_dimension:
-                tmp_x = out_x = 0
-                while tmp_x + self.size <= input_dimension:
-                    patch = in_tensor[:, tmp_y:tmp_y + self.size, tmp_x:tmp_x + self.size]
-                    out[f, out_y, out_x] += torch.sum(self.filters[f] * patch)
-                    tmp_x += self.stride
-                    out_x += 1
-                tmp_y += self.stride
-                out_y += 1
-        
-        return out
+        return out_
 
     def backward(self, din):
-        input_dimension = self.sz        # input dimension
+        input_dimension = din.size(-1)
         
-        dout = torch.zeros(self.num_filters,input_dimension,input_dimension)  # loss gradient of the input to the convolution operation
+        dout = torch.zeros(self.out_c,input_dimension,input_dimension)  # loss gradient of the input to the convolution operation
         
-        dfilt = torch.zeros(self.filters.size())                # loss gradient of filter
-
-        for f in range(self.num_filters):              # loop through all filters
+        dfilt = torch.zeros(self.conv.size())                # loss gradient of filter
+        
+        for f in range(self.out_c):              # loop through all filters
             tmp_y = out_y = 0
-            while tmp_y + self.size <= input_dimension:
+            while tmp_y + self.k <= input_dimension:
                 tmp_x = out_x = 0
-                while tmp_x + self.size <= input_dimension:
-                    patch = self.input[:, tmp_y:tmp_y + self.size, tmp_x:tmp_x + self.size]
-                    dfilt[f] += torch.sum(din[f, out_y, out_x] * patch, axis=0)
-                    dout[:, tmp_y:tmp_y + self.size, tmp_x:tmp_x + self.size] += din[f, out_y, out_x] * self.filters[f]
+                while tmp_x + self.k <= input_dimension:
+                    patch = self.input[0][:, tmp_y:tmp_y + self.k, tmp_x:tmp_x + self.k]
+                    dfilt[f] += torch.sum(din[0][f, out_y, out_x] * patch, axis=0)
+                    dout[:, tmp_y:tmp_y + self.k, tmp_x:tmp_x + self.k] += din[0][f, out_y, out_x] * self.conv[f]
                     tmp_x += self.stride
                     out_x += 1
                 tmp_y += self.stride
                 out_y += 1
         self.dfilt = dfilt
-        return dout
+        return dout.unsqueeze(0)
     
     def init_params(self, weights):
-        self.filters = weights 
+        self.conv = weights 
 
 
     def update(self, lr):
 
-        self.filters -= lr * self.dfilt                  # update filters using GD
+        self.conv -= lr * self.dfilt               # update filters using GD
 
 
     def param(self):
-          return [self.filters]
+          return self.conv
 
 
     def zero_grad(self):
-        self.dfilt = zeros((self.num_filters,self.size,self.size))
+        self.conv = torch.zeros(self.out_c, self.in_c, self.k, self.k)
 
 class MaxPooling2D(Module):
     """
@@ -262,8 +239,10 @@ class MaxPooling2D(Module):
     
     def forward(self, x):
         self.input = x                            # keep track of last input for later backward propagation
+        
+        print(x.size())
 
-        num_channels, h_prev, w_prev = x.size()
+        _,num_channels, h_prev, w_prev = x.size()
         h = int((h_prev - self.size) / self.stride) + 1     # compute output dimensions after the max pooling
         w = int((w_prev - self.size) / self.stride) + 1
 
@@ -274,19 +253,20 @@ class MaxPooling2D(Module):
             while curr_y + self.size <= h_prev:             # slide the max pooling window vertically across the image
                 curr_x = out_x = 0
                 while curr_x + self.size <= w_prev:         # slide the max pooling window horizontally across the image
-                    patch = x[i, curr_y:curr_y + self.size, curr_x:curr_x + self.size]
+                    patch = x[0][i, curr_y:curr_y + self.size, curr_x:curr_x + self.size]
                     downsampled[i, out_y, out_x] = torch.max(patch)       # choose the maximum value within the window
                     curr_x += self.stride                              # at each step and store it to the output matrix
                     out_x += 1
                 curr_y += self.stride
                 out_y += 1
 
-        return downsampled
+        return downsampled.unsqueeze(0)
     
     
     
     def backward(self, din):
-        num_channels, orig_dim, *_ = self.input.shape      # gradients are passed through the indices of greatest
+        print(self.input.shape)
+        _,num_channels, orig_dim, *_ = self.input.shape      # gradients are passed through the indices of greatest
                                                                 # value in the original pooling during the forward step
 
         dout = torch.zeros(self.input.shape)                  # initialize derivative
@@ -296,10 +276,10 @@ class MaxPooling2D(Module):
             while tmp_y + self.size <= orig_dim:
                 tmp_x = out_x = 0
                 while tmp_x + self.size <= orig_dim:
-                    patch = self.input[c, tmp_y:tmp_y + self.size, tmp_x:tmp_x + self.size] # obtain index of largest
+                    patch = self.input[0][c, tmp_y:tmp_y + self.size, tmp_x:tmp_x + self.size] # obtain index of largest
                     
                     (x, y) = self.unravel_index(torch.argmax(patch),patch.shape)                     # value in patch
-                    dout[c, tmp_y + x, tmp_x + y] += din[c, out_y, out_x]
+                    dout[0][c, tmp_y + x, tmp_x + y] += din[0][c, out_y, out_x]
                     tmp_x += self.stride
                     out_x += 1
                 tmp_y += self.stride
@@ -331,19 +311,23 @@ class Upsampling(Module):
     
     def forward(self, x):
         self.input = x     
-        num_channels, h, w = x.size()
+        _, num_channels, h, w = x.size()
         upsampled = torch.zeros((num_channels, h *self.scale_factor, w*self.scale_factor)) 
-        upsampled[0] = x[0].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
-        upsampled[1] = x[1].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
-        upsampled[2] = x[2].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+        upsampled[0] = x[0][0].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+        upsampled[1] = x[0][1].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
+        upsampled[2] = x[0][2].repeat_interleave(self.scale_factor, dim=0).repeat_interleave(self.scale_factor, dim=1)
 
 
-        return upsampled 
+        return upsampled.unsqueeze(0)
     
     
     def backward(self, din):    
         dout = torch.zeros(self.input.shape) 
-        dout[0] = din[0][0::2,0::2]
+        dout[0][0] = din[0][0][0::2,0::2]
+        dout[0][1] = din[0][1][0::2,0::2]
+        dout[0][2] = din[0][2][0::2,0::2]
+
+
         return dout 
     
     def param(self):                          # pooling layers have no weights

@@ -121,7 +121,7 @@ class Tests(unittest.TestCase):
 
     def test_train_model(self):
         title("Testing model training")
-        for i in []:
+        for i in [2]:
             with self.subTest(f"Testing model training for project {i}"):
                 self._test_train_model(i)
 
@@ -138,7 +138,7 @@ class Tests(unittest.TestCase):
 
         output_psnr_before = self.compute_psnr(val_input, val_target)
 
-        model.train(train_input0, train_input1, num_epochs=1)
+        model.train(train_input0.float(), train_input1.float(), num_epochs=1)
         
 
         mini_batch_size = 100
@@ -162,10 +162,10 @@ class Tests(unittest.TestCase):
         with self.subTest("Testing convolution"):
             Conv2d = model_module.Conv2d
             conv = Conv2d(3,3,3)
-            print(conv.forward(x))
-            print(F.conv2d(x, conv.param()[0]))
-            self.assertTrue(torch.allclose(conv.forward(x), F.conv2d(x, conv.param()[0], padding='same')))
-            self.assertTrue(torch.allclose(conv.forward(x), F.conv2d(x, conv.param()[0], padding='same')))
+            print(conv.forward(x).size())
+            print(F.conv2d(x, conv.param()).size())
+            self.assertTrue(torch.allclose(conv.forward(x), F.conv2d(x, conv.param(), padding='same')))
+            self.assertTrue(torch.allclose(conv.forward(x), F.conv2d(x, conv.param(), padding='same')))
 
 
         with self.subTest("Testing sigmoid"):
@@ -176,7 +176,7 @@ class Tests(unittest.TestCase):
         with self.subTest("Testing sequential"):
             Sequential = model_module.Sequential
             seq = Sequential(conv, sigmoid)
-            self.assertTrue(torch.allclose(seq.forward(x), F.conv2d(x, conv.weight, conv.bias).sigmoid()))
+            self.assertTrue(torch.allclose(seq.forward(x), F.conv2d(x, conv.param(), padding = 'same').sigmoid()))
 
 def warn(msg):
     print(f"\33[33m!!! Warning: {msg}\33[39m")
