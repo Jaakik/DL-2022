@@ -1,7 +1,9 @@
 # DL-2022
-Proj 273667 SCIPER2 SCIPER3
+This repository contains the implementation of a Model to denoise images. The architecure from project 1 is inspired from the Unet model. 
+In Proejct 2, we have implemented our own framework from scratch and trained it on the same dataset, please refer to the documentation of the classes for more detail. 
 
-Miniproject 1
+
+#Miniproject 1
 
     - init .py:
     - model.py: 
@@ -13,7 +15,7 @@ Miniproject 1
         - DataAugmentation.py: code to perform the data augmenation
         - Tune_model_Adam.py: code to tune our model
 
-Miniproject 2
+#Miniproject 2
 
     - init .py
     - model.py
