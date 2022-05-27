@@ -2,6 +2,8 @@
 This repository contains the implementation of a Model to denoise images. The architecure from project 1 is inspired from the Unet model. 
 In Proejct 2, we have implemented our own framework from scratch and trained it on the same dataset, please refer to the documentation of the classes for more detail. 
 
+For testing please use this modified test.py, only padding was changed. 
+
 
 #Miniproject 1
 
