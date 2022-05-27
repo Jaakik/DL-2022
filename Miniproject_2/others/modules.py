@@ -135,9 +135,11 @@ class  Conv2d(Module):
         Applies a 2D convolution over an input signal composed of several input planes. Applies padding = 1 by default. 
 
         :param stride: controls the stride for the cross-correlation, a single number or a tuple
-        :param size: size of filter
-        :param n_channels: number of input channels 
-        :param num_filters: number of output channels 
+        :param kernel_size: size of filter
+        :param in_channel: number of input channels 
+        :param out_channel: number of output channels 
+        :param padding: padding mode 
+        
     
         """
     def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, padding=1, bias=True):
